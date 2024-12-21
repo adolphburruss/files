@@ -1,1 +1,0 @@
-php spawner.php > /tmp/output.log 2>&1 &
